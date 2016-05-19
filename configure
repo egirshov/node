@@ -22,6 +22,7 @@ import nodedownload
 # parse our options
 parser = optparse.OptionParser()
 
+valid_arm_fpu = ('vfp', 'vfpv3', 'vfpv3-d16', 'neon')
 # Options should be in alphabetical order but keep --prefix at the top,
 # that's arguably the one people will be looking for most.
 parser.add_option('--prefix',
@@ -232,6 +233,13 @@ parser.add_option('--with-arm-float-abi',
     help='specifies which floating-point ABI to use. Valid values are: '
          'soft, softfp, hard')
 
+parser.add_option('--with-arm-fpu',
+    action='store',
+    dest='arm_fpu',
+    choices=valid_arm_fpu,
+    help='ARM FPU mode ({0}) [default: %default]'.format(
+        ', '.join(valid_arm_fpu)))
+
 parser.add_option('--with-dtrace',
     action='store_true',
     dest='with_dtrace',
@@ -439,10 +447,11 @@ def host_arch_cc():
   k = cc_macros()
 
   matchup = {
-    '__x86_64__'  : 'x64',
-    '__i386__'    : 'ia32',
+    '__aarch64__' : 'arm64',
     '__arm__'     : 'arm',
+    '__i386__'    : 'ia32',
     '__mips__'    : 'mips',
+    '__x86_64__'  : 'x64',
   }
 
   rtn = 'ia32' # default
@@ -495,18 +504,22 @@ def configure_arm(o):
   else:
     arm_float_abi = 'default'
 
-  if is_arch_armv7():
-    o['variables']['arm_version'] = '7'
-  elif is_arch_armv6():
-    o['variables']['arm_version'] = '6'
-  else:
-    o['variables']['arm_version'] = 'default'
+  arm_fpu = 'vfp'
 
-  o['variables']['arm_fpu'] = 'vfpv3'  # V8 3.18 no longer supports VFP2.
-  o['variables']['arm_neon'] = int(is_arm_neon())
+  if is_arch_armv7():
+    arm_fpu = 'vfpv3'
+    o['variables']['arm_version'] = '7'
+  else:
+    o['variables']['arm_version'] = '6' if is_arch_armv6() else 'default'
+
   o['variables']['arm_thumb'] = 0      # -marm
   o['variables']['arm_float_abi'] = arm_float_abi
 
+  if options.dest_os == 'android':
+    arm_fpu = 'vfpv3'
+    o['variables']['arm_version'] = '7'
+
+  o['variables']['arm_fpu'] = options.arm_fpu or arm_fpu
 
 def configure_node(o):
   if options.dest_os == 'android':
