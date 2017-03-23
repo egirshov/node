@@ -15,6 +15,11 @@ else
     ARCH="$2"
 fi
 
+# DEST_CPU is the target architecture passed to 'v8_target_arch' 
+# and to Node's configure script.
+# TOOLCHAIN_NAME is a type of toolchain provided by Android NDK
+# SUFFIX is actually a prefix for cc/c++ executables in android-toolchain/bin/
+
 CC_VER="4.9"
 case $ARCH in
     arm)
@@ -28,7 +33,7 @@ case $ARCH in
         TOOLCHAIN_NAME="$ARCH"
         ;;
     x86_64)
-        DEST_CPU="ia32"
+        DEST_CPU="x64"
         SUFFIX="$ARCH-linux-android"
         TOOLCHAIN_NAME="$ARCH"
         ;;
@@ -52,10 +57,12 @@ export CXX=$TOOLCHAIN/bin/$SUFFIX-g++
 export LINK=$TOOLCHAIN/bin/$SUFFIX-g++
 
 GYP_DEFINES="target_arch=$ARCH"
-GYP_DEFINES+=" v8_target_arch=$ARCH"
+GYP_DEFINES+=" v8_target_arch=$DEST_CPU"
 GYP_DEFINES+=" android_target_arch=$ARCH"
 GYP_DEFINES+=" host_os=linux OS=android"
 export GYP_DEFINES
+
+# NOTE: snapshots are now disabled by default
 
 if [ -f "configure" ]; then
     ./configure \
