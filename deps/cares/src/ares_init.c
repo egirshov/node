@@ -43,11 +43,29 @@
 #endif
 
 #if defined(ANDROID) || defined(__ANDROID__)
-#include <sys/system_properties.h>
 /* From the Bionic sources */
 #define DNS_PROP_NAME_PREFIX  "net.dns"
 #define MAX_DNS_PROPERTIES    8
+#if defined(__x86_64__)
+#include <dlfcn.h>
+#define PROP_NAME_MAX   32
+#define PROP_VALUE_MAX  92
+
+static int __system_property_get(const char* name, char* value) {
+  static int (*__real_system_property_get)(const char*, char*) = NULL;
+  if (__real_system_property_get == NULL) {
+    /* libc.so should already be open, get a handle to it. */
+    void* handle = dlopen("libc.so", RTLD_NOLOAD);
+    if (!handle) return 0;
+    __real_system_property_get = (int (*)(const char*, char*))dlsym(handle, "__system_property_get");
+    if (!__real_system_property_get) return 0;
+  }
+  return (*__real_system_property_get)(name, value);
+}
+#else
+#include <sys/system_properties.h>
 #endif
+#endif /* ANDROID */
 
 #include "ares.h"
 #include "ares_inet_net_pton.h"
