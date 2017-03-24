@@ -1477,7 +1477,8 @@
                   # library order and break (see crbug.com/469973).
                   'libraries': [
                     '-ldl',
-                    '-lrt'
+                    '-lrt',
+                    '-lpthread'
                   ]
                 }]
               ]
