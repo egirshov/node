@@ -756,7 +756,7 @@ def configure_node(o):
                      else target_arch != host_arch)
   want_snapshots = 1 if options.with_snapshot else 0
   o['variables']['want_separate_host_toolset'] = int(
-      cross_compiling and want_snapshots)
+      cross_compiling)
 
   if target_arch == 'arm':
     configure_arm(o)
