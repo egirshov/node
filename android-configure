@@ -15,8 +15,7 @@ else
     ARCH="$2"
 fi
 
-# DEST_CPU is the target architecture passed to 'v8_target_arch' 
-# and to Node's configure script.
+# DEST_CPU is the target architecture passed to 'v8_target_arch' and to Node's configure.
 # TOOLCHAIN_NAME is a type of toolchain provided by Android NDK
 # SUFFIX is actually a prefix for cc/c++ executables in android-toolchain/bin/
 
@@ -51,6 +50,10 @@ $1/build/tools/make-standalone-toolchain.sh \
     --install-dir=$TOOLCHAIN \
     --platform=android-21
 export PATH=$TOOLCHAIN/bin:$PATH
+export AR_host=${AR:-ar}
+export CC_host=${CC:-gcc}
+export CXX_host=${CXX:-g++}
+export LINK_host=${CXX:-g++}
 export AR=$TOOLCHAIN/bin/$SUFFIX-ar
 export CC=$TOOLCHAIN/bin/$SUFFIX-gcc
 export CXX=$TOOLCHAIN/bin/$SUFFIX-g++
@@ -67,5 +70,6 @@ if [ -f "configure" ]; then
         --dest-cpu=$DEST_CPU \
         --dest-os=android \
         --without-snapshot \
+        --cross-compiling \
         --openssl-no-asm
 fi
