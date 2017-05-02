@@ -15,10 +15,15 @@ else
     ARCH="$2"
 fi
 
-# DEST_CPU is the target architecture passed to 'v8_target_arch' 
-# and to Node's configure script.
+# DEST_CPU is the target architecture passed to 'v8_target_arch' and Node's configure script.
 # TOOLCHAIN_NAME is a type of toolchain provided by Android NDK
 # SUFFIX is actually a prefix for cc/c++ executables in android-toolchain/bin/
+
+if [ -z "$3" ]; then
+    TOOLCHAIN_DIR=android-toolchain
+else
+    TOOLCHAIN_DIR="$3"
+fi
 
 CC_VER="4.9"
 case $ARCH in
@@ -43,7 +48,7 @@ case $ARCH in
         ;;
 esac
 
-export TOOLCHAIN=$PWD/android-toolchain
+export TOOLCHAIN=$PWD/$TOOLCHAIN_DIR
 mkdir -p $TOOLCHAIN
 $1/build/tools/make-standalone-toolchain.sh \
     --toolchain=$TOOLCHAIN_NAME-$CC_VER \
